@@ -1,0 +1,3 @@
+# Configuração do HLint (sugestões de estilo). A CI falha em "warning".
+# Não desative regras aqui sem combinar com o grupo.
+- ignore: {name: "Use camelCase"}

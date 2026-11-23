@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    name: Build e testes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: haskell-actions/setup@v2
+        id: setup
+        with:
+          ghc-version: "9.6"
+          cabal-version: "latest"
+
+      - name: Resolver dependências
+        run: cabal update && cabal build all --dry-run
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.setup.outputs.cabal-store }}
+          key: ${{ runner.os }}-ghc-9.6-${{ hashFiles('**/*.cabal', 'dist-newstyle/cache/plan.json') }}
+          restore-keys: ${{ runner.os }}-ghc-9.6-
+
+      - name: Compilar
+        run: cabal build all
+
+      - name: Testes
+        run: cabal test --test-show-details=direct
+
+  hlint:
+    name: HLint (sugestões de estilo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: haskell-actions/hlint-setup@v2
+      - uses: haskell-actions/hlint-run@v2
+        with:
+          path: '["src/", "test/", "app/"]'
+          fail-on: warning
