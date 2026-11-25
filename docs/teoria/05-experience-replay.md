@@ -1,6 +1,6 @@
 # Experience replay
 
-> **Parte 5** · Responsável: _(seu nome completo)_ · Código relacionado: `DQN.Replay`
+> **Parte 5** · Responsável: Joao Gabriel Araujo Ferreira · Código relacionado: `DQN.Replay`
 
 ## O que esta seção precisa cobrir
 
