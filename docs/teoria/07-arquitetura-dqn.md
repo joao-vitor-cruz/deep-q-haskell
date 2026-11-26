@@ -4,22 +4,23 @@
 
 ## O algoritmo DQN
 
-No CartPole, o agente observa quatro valores contínuos — posição e velocidade
-do carrinho, ângulo e velocidade angular da haste — e escolhe entre empurrar
-para a esquerda ou para a direita. A rede neural aproxima a função
-`Q(s, a)`: quanto retorno futuro se espera ao escolher a ação `a` no estado
-`s`.
+O agente observa quatro valores contínuos — posição e velocidade do carrinho,
+ângulo e velocidade angular da haste — e escolhe entre empurrar o carrinho
+para a esquerda ou para a direita. A rede neural aproxima a função `Q(s, a)`,
+que estima o retorno futuro esperado ao escolher a ação `a` no estado `s`.
+Esse retorno considera as recompensas futuras com o desconto `γ`.
 
-O treinamento combina as peças das partes anteriores:
+O treinamento combina as seguintes partes anteriores:
 
 1. A política ε-greedy escolhe uma ação usando a rede online. Com probabilidade
    ε, escolhe uma ação aleatória para explorar; no restante dos casos, escolhe
-   a ação com maior Q-valor para aproveitar o que já aprendeu.
+   a ação com o maior Q-valor estimado para o estado atual.
 2. O ambiente aplica a ação e devolve o próximo estado, a recompensa e a
-   indicação de término.
+   indicação de se o episódio terminou.
 3. O agente guarda a transição `(s, a, r, s', done)` no replay buffer.
 4. Depois do warmup, sorteia um minibatch do buffer e ajusta a rede online
-   para aproximar seus Q-valores dos alvos de Bellman.
+   para aproximar a previsão `Q(s, a)` do alvo de Bellman calculado para cada
+   transição.
 5. A cada quantidade configurada de passos, copia a rede online para a rede
    target.
 
@@ -28,15 +29,23 @@ O treino completo executa a quantidade configurada de episódios.
 
 ## Rede online e rede target
 
-A **rede online** é a rede que escolhe as ações e recebe as atualizações do
-gradiente. A **rede target** é uma cópia dos pesos da online, mas fica parada
-entre sincronizações. Ela calcula o alvo usado para treinar a online.
+A **rede online** prevê os Q-valores das ações possíveis no estado atual do
+CartPole. O agente usa essas previsões para escolher uma ação com maior retorno
+futuro esperado, embora a política ε-greedy também possa escolher uma ação
+aleatória durante a exploração. Depois do warmup (`hpWarmupSteps`), os pesos
+da online são atualizados em cada passo de treino (`trainStep`).
 
-Se usássemos a mesma rede para prever o Q-valor atual e para calcular o alvo,
-ambos mudariam a cada atualização. Isso faria o objetivo de treino se mover
-junto com a previsão, aumentando a instabilidade. A target reduz esse problema:
-seus pesos permanecem fixos por vários passos e só são substituídos pelos pesos
-da online a cada `hpTargetUpdateEvery` passos.
+A **rede target** é uma cópia separada da online. Para cada transição, ela
+estima os Q-valores das ações possíveis no próximo estado `s'`; o maior deles
+ajuda a calcular o alvo de Bellman. A target não é o objetivo final do agente:
+é usada para calcular um alvo de treino `y` para cada transição. Se a transição
+não for terminal, `y` também inclui a recompensa imediata `r` e o desconto `γ`.
+
+A target fica parada entre sincronizações para que o alvo de treino não mude a
+cada atualização da online. Depois de processar um passo do ambiente, se o
+total de passos atingir um múltiplo de `hpTargetUpdateEvery`, seus pesos são
+substituídos por uma cópia dos pesos atuais da online. Manter o alvo estável
+entre essas cópias ajuda a reduzir a instabilidade do treinamento.
 
 ## Fórmula do alvo de Bellman
 
@@ -74,13 +83,15 @@ nenhum valor do próximo estado.
 
 ## Warmup, sincronização e melhor rede
 
-O **warmup** impede o treino antes de haver experiências suficientes no replay
-buffer (`hpWarmupSteps`). Quando o limite é alcançado, cada passo pode sortear
-um minibatch (`hpBatchSize`) e fazer uma atualização da online.
+O **warmup** impede o treino antes de o replay buffer reunir a quantidade
+mínima de experiências definida por `hpWarmupSteps`. Quando esse limite é
+alcançado, cada passo pode sortear um minibatch (`hpBatchSize`) e atualizar a
+online.
 
-A target é sincronizada depois do treino quando o total de passos é múltiplo de
-`hpTargetUpdateEvery`. Assim, durante os passos entre cópias, os alvos de
-Bellman são calculados com os mesmos pesos.
+A target é sincronizada depois de processar o passo cujo total é múltiplo de
+`hpTargetUpdateEvery`. Se houve treino nesse passo, a cópia inclui a atualização
+mais recente da online. Entre cópias, os alvos de Bellman são calculados com os
+mesmos pesos da target.
 
 O DQN pode oscilar: uma rede que teve bom desempenho pode piorar mais tarde.
 Por isso, depois de cada episódio, `train` calcula a média de recompensa da
@@ -119,13 +130,13 @@ O módulo `DQN.Agent` liga as partes do projeto:
 
 3. **Pergunta:** O que o warmup faz?
    **Resposta:** Aguarda o buffer atingir `hpWarmupSteps` antes de sortear
-   minibatches. Assim, o primeiro treino usa experiências variadas em vez de
-   depender de uma memória quase vazia.
+   minibatches. Assim, o primeiro treino só começa depois que o buffer acumulou
+   a quantidade mínima de experiências configurada.
 
 4. **Pergunta:** Quando a target é sincronizada?
-   **Resposta:** Quando o total de passos do agente é múltiplo de
+   **Resposta:** Depois de processar um passo cujo total é múltiplo de
    `hpTargetUpdateEvery`; nesse momento, `agentTarget` recebe uma cópia da
-   rede online atualizada.
+   rede online, incluindo a atualização daquele passo, se houve treino.
 
 5. **Pergunta:** Por que guardar `agentBest` se já temos `agentOnline`?
    **Resposta:** O desempenho do DQN pode oscilar. `agentBest` preserva a rede
