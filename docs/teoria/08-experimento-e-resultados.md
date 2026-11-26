@@ -71,7 +71,7 @@ Resultado final: $[10.0, 15.0, 20.0, 36.67]$.
   - Cria o diretório `results/` e grava `results/training.csv` com os dados de cada episódio.
   - Exibe no terminal o gráfico ASCII da média móvel de 20 episódios e imprime a comparação de desempenho médio (em 20 episódios) entre a **política aleatória** (`evaluateRandomPolicy`, ~20–25 passos), a **rede final** (`agentOnline`) e a **melhor rede** (`agentBest`).
 - **Funções puras de análise e visualização (`src/DQN/Experiment.hs`):**
-  - `logsToCsv`: serializa `[EpisodeLog]` no formato CSV com o cabeçalho `episode,total_reward,epsilon,avg_loss`.
+  - `logsToCsv`: serializa `[EpisodeLog]` no formato CSV com o cabeçalho `episode,total_reward,epsilon,avg_loss`, utilizando `printf` (`%.2f`, `%.4f` e `%.6f`) para evitar notação científica em valores pequenos como `epsilon = 0.05` ou perdas baixas.
   - `movingAverage`: implementa exatamente a média móvel com janela parcial nos primeiros elementos.
   - `evaluatePolicy`: roda $n$ episódios usando `resetEnv`, `stepEnv` (`DQN.Env`) e `greedyAction` (`DQN.Policy`) propagando o gerador `StdGen` puramente, sem alterar pesos nem usar $\varepsilon$.
   - `asciiChart`: normaliza os valores entre mínimo e máximo e agrupa intervalos por média (`resample`) quando a quantidade de episódios excede a largura do terminal, desenhando as barras com `#`.
