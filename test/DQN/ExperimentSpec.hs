@@ -25,10 +25,11 @@ spec =
               EpisodeLog 2 22.0 0.98 0.08
             ]
           csvLines = lines (logsToCsv sampleLogs)
-      length csvLines `shouldBe` 3
-      head csvLines `shouldBe` "episode,total_reward,epsilon,avg_loss"
-      csvLines !! 1 `shouldBe` "1,15.0,0.99,0.12"
-      csvLines !! 2 `shouldBe` "2,22.0,0.98,0.08"
+      csvLines 
+        `shouldBe` [ "episode,total_reward,epsilon,avg_loss",
+                     "1,15.00,0.9900,0.120000",
+                     "2,22.00,0.9800,0.080000"
+                   ]
 
     it "calcula corretamente a media movel com janela parcial no inicio" $ do
       movingAverage 2 [2, 4, 6] `shouldBe` [2.0, 3.0, 5.0]

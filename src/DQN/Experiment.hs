@@ -26,6 +26,7 @@ import DQN.Types
   )
 import Data.List (intercalate)
 import System.Random (StdGen)
+import Text.Printf (printf)
 
 -- | Converte a lista de registros de episódios em texto no formato CSV,
 -- com o cabeçalho exato @"episode,total_reward,epsilon,avg_loss"@.
@@ -41,9 +42,9 @@ logsToCsv logs =
       intercalate
         ","
         [ show (logEpisode entry),
-          show (logTotalReward entry),
-          show (logEpsilon entry),
-          show (logAvgLoss entry)
+          printf "%.2f" (logTotalReward entry),
+          printf "%.4f" (logEpsilon entry),
+          printf "%.6f" (logAvgLoss entry)
         ]
 
 -- | Calcula a média móvel de janela @w@ sobre uma série de valores:
