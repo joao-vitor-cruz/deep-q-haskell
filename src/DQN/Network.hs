@@ -23,7 +23,7 @@ import System.Random (StdGen, randomR)
 
 -- | Função de ativação ReLU (Rectified Linear Unit): @ReLU(z) = max(0, z)@.
 relu :: Double -> Double
-relu z = max 0.0 z
+relu = max 0.0
 
 -- | Derivada da função ReLU: @1@ se @z > 0@, e @0@ caso contrário
 -- (inclusive em @z = 0@).
