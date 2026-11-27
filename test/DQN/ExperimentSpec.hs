@@ -1,10 +1,47 @@
 module DQN.ExperimentSpec (spec) where
 
+import DQN.Experiment
+  ( asciiChart,
+    evaluatePolicy,
+    logsToCsv,
+    movingAverage,
+  )
+import DQN.Network (initNetwork)
+import DQN.Types
+  ( EpisodeLog (..),
+    Hyperparams (..),
+    defaultHyperparams,
+  )
+import System.Random (mkStdGen)
 import Test.Hspec
 
 -- | Testes da Parte 8 (experimento e resultados).
--- Substitua o "pending" pelos testes mínimos listados no AGENTS.md, seção "Parte 8".
 spec :: Spec
 spec =
-  describe "DQN.Experiment" $
-    it "ainda nao implementado (Parte 8)" pending
+  describe "DQN.Experiment" $ do
+    it "gera CSV com cabecalho exato e uma linha por episodio" $ do
+      let sampleLogs =
+            [ EpisodeLog 1 15.0 0.99 0.12,
+              EpisodeLog 2 22.0 0.98 0.08
+            ]
+          csvLines = lines (logsToCsv sampleLogs)
+      csvLines 
+        `shouldBe` [ "episode,total_reward,epsilon,avg_loss",
+                     "1,15.00,0.9900,0.120000",
+                     "2,22.00,0.9800,0.080000"
+                   ]
+
+    it "calcula corretamente a media movel com janela parcial no inicio" $ do
+      movingAverage 2 [2, 4, 6] `shouldBe` [2.0, 3.0, 5.0]
+      movingAverage 3 [10, 20, 30, 40] `shouldBe` [10.0, 15.0, 20.0, 30.0]
+
+    it "avalia a politica gulosa devolvendo n recompensas dentro do limite" $ do
+      let hp = defaultHyperparams {hpMaxStepsPerEpisode = 50}
+          (net, gen1) = initNetwork (hpLayerSizes hp) (mkStdGen 42)
+          (rewards, _) = evaluatePolicy hp net 10 gen1
+      length rewards `shouldBe` 10
+      all (\r -> r >= 1.0 && r <= 50.0) rewards `shouldBe` True
+
+    it "gera grafico ASCII com a quantidade exata de linhas solicitada" $ do
+      let chart = asciiChart 10 5 [10.0, 25.0, 50.0, 100.0, 200.0]
+      length (lines chart) `shouldBe` 5
