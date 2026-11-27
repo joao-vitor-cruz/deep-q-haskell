@@ -26,6 +26,6 @@ indicando a parte e o responsável):
 https://claude.ai/artifact/2GvmRNxaREKAw6w1qNaf2x
 
 - Dá para baixar como PowerPoint (.pptx) ou PDF pelo próprio deck.
-- O slide de **Resultados** tem campos `[__]` para preencher depois que a
-  Parte 8 entrar e o treino rodar (`cabal run dqn -- 42 400`).
+- O slide de **Resultados** já está preenchido com o treino da semente 42
+  (`cabal run dqn -- 42 400`) e compara com a semente 1.
 - Cada integrante revisa o slide da sua parte.
