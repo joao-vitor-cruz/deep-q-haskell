@@ -87,7 +87,7 @@ trainStep hp agent transitions
 runEpisode :: Hyperparams -> Int -> Agent -> StdGen -> (Agent, EpisodeLog, StdGen)
 runEpisode hp episodeNumber agent0 gen0 =
   let (initialState, gen1) = resetEnv gen0
-   in go False initialState agent0 gen1 0 0 0 0
+   in go False initialState agent0 gen1 0 0 0 (0 :: Int)
   where
     go !finished !state !agent !gen !episodeSteps !rewardSum !lossSum !trainCount
       | finished || episodeSteps >= hpMaxStepsPerEpisode hp =
