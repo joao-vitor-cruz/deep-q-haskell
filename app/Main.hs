@@ -30,6 +30,7 @@ import System.Environment (getArgs)
 import System.Random (StdGen, mkStdGen, uniformR)
 import Text.Printf (printf)
 import Text.Read (readMaybe)
+import Data.Maybe (fromMaybe)
 
 main :: IO ()
 main = do
@@ -82,10 +83,10 @@ parseArgs args =
   let defaultSeed = 42
       defaultEps = hpEpisodes defaultHyperparams
       seed = case args of
-        (s : _) -> maybe defaultSeed id (readMaybe s)
+        (s : _) -> fromMaybe defaultSeed (readMaybe s)
         [] -> defaultSeed
       eps = case args of
-        (_ : e : _) -> maybe defaultEps id (readMaybe e)
+        (_ : e : _) -> fromMaybe defaultEps (readMaybe e)
         _ -> defaultEps
    in (seed, max 1 eps)
 
