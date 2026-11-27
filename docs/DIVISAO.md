@@ -29,16 +29,3 @@ https://claude.ai/artifact/2GvmRNxaREKAw6w1qNaf2x
 - O slide de **Resultados** tem campos `[__]` para preencher depois que a
   Parte 8 entrar e o treino rodar (`cabal run dqn -- 42 400`).
 - Cada integrante revisa o slide da sua parte.
-
-## Prazos
-
-| Marco | Data |
-|---|---|
-| Onda 1 na `main` (Env, Linalg, Replay) | |
-| Ondas 2 e 3 na `main` | |
-| Onda 4 (Agent) na `main` | |
-| Onda 5 (Main) e projeto rodando | |
-| Teoria de todas as partes | |
-| Slides prontos | |
-| Ensaio da apresentação | |
-| Apresentação | |
